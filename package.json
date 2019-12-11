@@ -1,0 +1,19 @@
+{
+  "name": "terminal_ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup -c",
+    "open-chrome": "google-chrome ./dist/index.html",
+    "start": "npm run build && npm run open-chrome"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "rollup": "^1.27.9"
+  },
+  "dependencies": {
+    "rollup-plugin-progress": "^1.1.1"
+  }
+}
