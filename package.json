@@ -11,9 +11,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "rollup": "^1.27.9"
-  },
-  "dependencies": {
+    "rollup": "^1.27.9",
     "rollup-plugin-progress": "^1.1.1"
-  }
+  },
+  "dependencies": {}
 }
