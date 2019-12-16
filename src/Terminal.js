@@ -46,6 +46,7 @@ export default class Terminal {
                 res(text);
             });
             inputElem.addEventListener('keydown', (e) => {
+                //BUG:行に文字がある状態でctrl+Dすると行の文字の内容を消してしまう
                 if (e.ctrlKey && e.key === 'd') {
                     const text = e.srcElement.value;
                     const color = e.srcElement.style.color;
