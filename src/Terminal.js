@@ -15,12 +15,17 @@ export default class Terminal {
             const inputElem = document.createElement('input');
             inputElem.type = 'text';
             if (lastLine !== null && [...lastLine.classList].includes('line')) {
-                const lineWidth = lastLine.offsetWidth;
-                const spansWidth = [...lastLine.children]
-                    .map(e => e.offsetWidth)
-                    .reduce((a, c) => a + c)
-                    ;
-                inputElem.style.width = `${lineWidth - spansWidth}px`;
+                const spans = [...lastLine.children];
+                if (spans.length !== 0) {
+                    const lineWidth = lastLine.offsetWidth;
+                    const spansWidth = spans
+                        .map(e => e.offsetWidth)
+                        .reduce((a, c) => a + c)
+                        ;
+                    inputElem.style.width = `${lineWidth - spansWidth}px`;
+                } else {
+                    inputElem.style.width = '100%';
+                }
                 lastLine.appendChild(inputElem);
             } else {
                 const line = this._createNewLine();
@@ -40,6 +45,19 @@ export default class Terminal {
                 this.terminalElem.appendChild(this._createNewLine());
                 res(text);
             });
+            inputElem.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'd') {
+                    const text = e.srcElement.value;
+                    const color = e.srcElement.style.color;
+                    const bgColor = e.srcElement.style.backgroundColor;
+                    const currentLine = inputElem.parentNode;
+                    inputElem.remove();
+                    this._appendSpan(currentLine, `${text}^D`, {color, bgColor});
+                    this.terminalElem.appendChild(this._createNewLine());
+                    res(0);
+                    event.preventDefault();
+                }
+            })
         });
     }
     out(text, style = {}) {
