@@ -1,6 +1,7 @@
 import Buffer from './Buffer';
 export default class Shell {
-    constructor(terminal, prompt = '> ') {
+    constructor(terminal, version, prompt = '> ') {
+        this.version = version;
         this.terminal = terminal;
         this.buffer = new Buffer();
         this.promptStr = prompt;
@@ -49,7 +50,7 @@ export default class Shell {
             }
             await this.execCommand(commandData.commandName, io, commandData.args);
             if (commandData.after === '|') {
-                this.buffer.out(0);
+                this.buffer.out('\x04');
             }
             if (this.status !== 0 && commandData.after === '&&') break;
         }
@@ -106,11 +107,22 @@ export default class Shell {
         this.terminal.out(this.promptStr, {color: this.status === 0 ? 'white' : 'red'});
         const command = await this.terminal.in({
             oninput: ({srcElement}) => {
+                if (srcElement.value === '') {
+                    srcElement.style.color = 'white';
+                    return;
+                }
                 const {err} = this.parseCommand(srcElement.value);
                 srcElement.style.color = err ? 'red' : 'cyan';
             }
         });
+        if (command.includes('\x04')) return false;
         const {commandArray} = this.parseCommand(command);
         await this.execCommands(commandArray);
+        return true;
+    }
+    async run() {
+        this.terminal.out(`Kuso Zako Terminal Modoki ${this.version}\n\n`, {color: 'gray'});
+        while (await this.prompt());
+        this.terminal.out('logged out');
     }
 }

@@ -35,30 +35,35 @@ export default class Terminal {
             }
             inputElem.focus();
             if (typeof (oninput) === 'function') inputElem.addEventListener('input', oninput);
-            inputElem.addEventListener('change', (e) => {
+            let onchange, onkeydown;
+            inputElem.addEventListener('change', onchange = (e) => {
                 const text = e.srcElement.value;
                 const color = e.srcElement.style.color;
                 const bgColor = e.srcElement.style.backgroundColor;
-                const currentLine = inputElem.parentNode;
-                inputElem.remove();
+                const currentLine = e.srcElement.parentNode;
+                e.srcElement.removeEventListener('change', onchange);
+                e.srcElement.removeEventListener('keydown', onkeydown);
+                e.srcElement.remove();
                 this._appendSpan(currentLine, text, {color, bgColor});
                 this.terminalElem.appendChild(this._createNewLine());
                 res(text);
             });
-            inputElem.addEventListener('keydown', (e) => {
-                //BUG:行に文字がある状態でctrl+Dすると行の文字の内容を消してしまう
+            inputElem.addEventListener('keydown', onkeydown = (e) => {
                 if (e.ctrlKey && e.key === 'd') {
+                    e.preventDefault();
+                    e.stopPropagation();
                     const text = e.srcElement.value;
                     const color = e.srcElement.style.color;
                     const bgColor = e.srcElement.style.backgroundColor;
-                    const currentLine = inputElem.parentNode;
-                    inputElem.remove();
+                    const currentLine = e.srcElement.parentNode;
+                    e.srcElement.removeEventListener('change', onchange);
+                    e.srcElement.removeEventListener('keydown', onkeydown);
+                    e.srcElement.remove();
                     this._appendSpan(currentLine, `${text}^D`, {color, bgColor});
                     this.terminalElem.appendChild(this._createNewLine());
-                    res(0);
-                    event.preventDefault();
+                    res(`${text}\x04`);
                 }
-            })
+            });
         });
     }
     out(text, style = {}) {
