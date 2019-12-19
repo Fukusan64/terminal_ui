@@ -47,5 +47,5 @@ window.onload = async () => {
         return 0;
     });
 
-    shell.run();
+    while(true) await shell.run();
 };

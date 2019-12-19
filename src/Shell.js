@@ -1,6 +1,8 @@
 import Buffer from './Buffer';
 export default class Shell {
     constructor(terminal, version, prompt = '> ') {
+        this.user;
+        this.password;
         this.version = version;
         this.terminal = terminal;
         this.buffer = new Buffer();
@@ -121,7 +123,16 @@ export default class Shell {
         return true;
     }
     async run() {
+        this.terminal.clear();
+        this.terminal.out('login\n');
+        this.terminal.out('user: ');
+        this.user = await this.terminal.in();
+        if (this.user.includes('\x04')) return;
+        this.terminal.out('password: ');
+        this.password = await this.terminal.in({hidden: true});
+        if (this.password.includes('\x04')) return;
         this.terminal.out(`Kuso Zako Terminal Modoki ${this.version}\n\n`, {color: 'gray'});
+
         while (await this.prompt());
         this.terminal.out('logged out');
     }
