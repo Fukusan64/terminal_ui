@@ -9,7 +9,7 @@ export default class Terminal {
                 ;
         });
     }
-    in({oninput} = {}) {
+    in({oninput, hidden} = {}) {
         return new Promise(res => {
             const lastLine = this.terminalElem.lastElementChild;
             const inputElem = document.createElement('input');
@@ -34,7 +34,8 @@ export default class Terminal {
                 this.terminalElem.appendChild(line);
             }
             inputElem.focus();
-            if (typeof (oninput) === 'function') inputElem.addEventListener('input', oninput);
+            if (hidden)inputElem.style.color = 'rgba(0,0,0,0)';
+            else if (typeof (oninput) === 'function') inputElem.addEventListener('input', oninput);
             let onchange, onkeydown;
             inputElem.addEventListener('change', onchange = (e) => {
                 const text = e.srcElement.value;
