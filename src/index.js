@@ -2,7 +2,7 @@ import Terminal from './Terminal';
 import Shell from './Shell';
 window.onload = async () => {
     const terminal = new Terminal('terminal');
-    const shell = new Shell(terminal, 'v0.0.2', '> ');
+    const shell = new Shell(terminal, 'v0.1.0', '> ');
 
     shell.addCommand('true', () => 0);
     shell.addCommand('false', () => -1);
