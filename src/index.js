@@ -6,7 +6,7 @@ window.onload = async () => {
     const terminal = new Terminal('terminal');
     const shell = new Shell(terminal, 'v0.1.0', '> ');
 
-    commands.forEach((val, key) => shell.addCommand(key, val));
+    for (const [key, val] of Object.entries(commands)) shell.addCommand(key, val);
 
     while(true) await shell.run();
 };
