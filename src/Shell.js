@@ -70,7 +70,7 @@ export default class Shell {
             this.terminal.out(`Command '${name}' not found\n`, {color: 'red'});
             this.status = -1;
             return;
-        };
+        }
         let status = await cmd(io, args);
         if (typeof (status) !== 'number') status = -1;
         this.status = status;
