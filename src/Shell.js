@@ -3,6 +3,7 @@ export default class Shell {
     constructor(terminal, version, prompt = '> ') {
         this.user;
         this.password;
+        this.killed = false;
         this.version = version;
         this.terminal = terminal;
         this.buffer = new Buffer();
@@ -26,6 +27,10 @@ export default class Shell {
         });
         this.addCommand('clear', () => {
             this.terminal.clear();
+            return 0;
+        });
+        this.addCommand('exit', () => {
+            this.killed = true;
             return 0;
         });
     }
@@ -55,6 +60,7 @@ export default class Shell {
                 this.buffer.out('\x04');
             }
             if (this.status !== 0 && commandData.after === '&&') break;
+            if (this.killed) break;
         }
     }
     async execCommand(name, io, args) {
@@ -117,10 +123,12 @@ export default class Shell {
                 srcElement.style.color = err ? 'red' : 'cyan';
             }
         });
-        if (command.includes('\x04')) return false;
+        if (command.includes('\x04')) {
+            this.killed = true;
+            return;
+        }
         const {commandArray} = this.parseCommand(command);
         await this.execCommands(commandArray);
-        return true;
     }
     async run() {
         this.terminal.clear();
@@ -131,9 +139,9 @@ export default class Shell {
         this.terminal.out('password: ');
         this.password = await this.terminal.in({hidden: true});
         if (this.password.includes('\x04')) return;
+        this.killed = false;
         this.terminal.out(`Kuso Zako Terminal Modoki ${this.version}\n\n`, {color: 'gray'});
 
-        while (await this.prompt());
-        this.terminal.out('logged out');
+        while (!this.killed) await this.prompt();
     }
 }
