@@ -135,6 +135,7 @@ export default class Shell {
         await this.execCommands(commandArray);
     }
     async run() {
+        //多分シェルの仕事じゃないけど面倒なのでここでログイン処理をこなしてしまう
         this.terminal.clear();
         this.terminal.out('login\n');
         this.terminal.out('user: ');
