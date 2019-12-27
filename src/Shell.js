@@ -1,13 +1,17 @@
 import Buffer from './Buffer';
 export default class Shell {
-    constructor(terminal, version, prompt = '> ') {
+    constructor(
+        terminal,
+        version,
+        promptFunc = (out, isError) => out('> ', {color: (isError ? 'red' : 'white')})
+    ) {
         this.user;
         this.password;
         this.killed = false;
         this.version = version;
         this.terminal = terminal;
         this.buffer = new Buffer();
-        this.promptStr = prompt;
+        this.promptFunc = promptFunc;
         this.status = 0;
         this.commands = new Map();
         this.addCommand('help', (io) => {
@@ -112,7 +116,7 @@ export default class Shell {
         return {commandArray, err};
     }
     async prompt() {
-        this.terminal.out(this.promptStr, {color: this.status === 0 ? 'white' : 'red'});
+        this.promptFunc((...args) => this.terminal.out(...args), this.status !== 0, this.user);
         const command = await this.terminal.in({
             oninput: ({srcElement}) => {
                 if (srcElement.value === '') {
