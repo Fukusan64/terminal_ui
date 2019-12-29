@@ -22,7 +22,7 @@ export default class Terminal {
                         .map(e => e.offsetWidth)
                         .reduce((a, c) => a + c)
                         ;
-                    inputElem.style.width = `${lineWidth - spansWidth}px`;
+                    inputElem.style.width = `${lineWidth - spansWidth - 1}px`;
                 } else {
                     inputElem.style.width = '100%';
                 }
