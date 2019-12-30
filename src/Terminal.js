@@ -9,7 +9,7 @@ export default class Terminal {
                 ;
         });
     }
-    in({oninput, hidden} = {}) {
+    in({oninput, hidden, defaultVal,defaultColor} = {}) {
         return new Promise(res => {
             const lastLine = this.terminalElem.lastElementChild;
             const inputElem = document.createElement('input');
@@ -34,35 +34,45 @@ export default class Terminal {
                 this.terminalElem.appendChild(line);
             }
             inputElem.focus();
-            if (hidden)inputElem.style.color = 'rgba(0,0,0,0)';
-            else if (typeof (oninput) === 'function') inputElem.addEventListener('input', oninput);
-            let onchange, onkeydown;
-            inputElem.addEventListener('change', onchange = (e) => {
+            if (hidden) inputElem.style.color = 'rgba(0,0,0,0)';
+            else {
+                if (typeof (oninput) === 'function') inputElem.addEventListener('input', oninput);
+                if (typeof (defaultColor) === 'string') inputElem.style.color = defaultColor;
+            }
+            if (defaultVal !== undefined) inputElem.value = defaultVal;
+            let onkeydown;
+            inputElem.addEventListener('keydown', onkeydown = (e) => {
                 const text = e.srcElement.value;
                 const color = e.srcElement.style.color;
                 const bgColor = e.srcElement.style.backgroundColor;
                 const currentLine = e.srcElement.parentNode;
-                e.srcElement.removeEventListener('change', onchange);
-                e.srcElement.removeEventListener('keydown', onkeydown);
-                e.srcElement.remove();
-                this._appendSpan(currentLine, text, {color, bgColor});
-                this.terminalElem.appendChild(this._createNewLine());
-                res(text);
-            });
-            inputElem.addEventListener('keydown', onkeydown = (e) => {
                 if (e.ctrlKey && e.key === 'd') {
                     e.preventDefault();
                     e.stopPropagation();
-                    const text = e.srcElement.value;
-                    const color = e.srcElement.style.color;
-                    const bgColor = e.srcElement.style.backgroundColor;
-                    const currentLine = e.srcElement.parentNode;
-                    e.srcElement.removeEventListener('change', onchange);
                     e.srcElement.removeEventListener('keydown', onkeydown);
+                    e.srcElement.removeEventListener('input', oninput);
                     e.srcElement.remove();
                     this._appendSpan(currentLine, `${text}^D`, {color, bgColor});
                     this.terminalElem.appendChild(this._createNewLine());
                     res(`${text}\x04`);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.srcElement.removeEventListener('keydown', onkeydown);
+                    e.srcElement.removeEventListener('input', oninput);
+                    e.srcElement.remove();
+                    this._appendSpan(currentLine, `${text}`, {color, bgColor});
+                    this.terminalElem.appendChild(this._createNewLine());
+                    res(text);
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.srcElement.removeEventListener('keydown', onkeydown);
+                    e.srcElement.removeEventListener('input', oninput);
+                    e.srcElement.remove();
+                    this._appendSpan(currentLine, `${text}`, {color, bgColor});
+                    this.terminalElem.appendChild(this._createNewLine());
+                    res(`${text}\x09`);
                 }
             });
         });
@@ -93,6 +103,7 @@ export default class Terminal {
         str = str.replace(/>/g, '&gt;');
         str = str.replace(/"/g, '&quot;');
         str = str.replace(/'/g, '&#39;');
+        str = str.replace(/\t/g, '&#9;');
         str = str.replace(/\s/g, '&nbsp;');
         return str;
     }

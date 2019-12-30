@@ -13,6 +13,7 @@ export default class Shell {
         this.buffer = new Buffer();
         this.promptFunc = promptFunc;
         this.status = 0;
+        this.defaultVal = '';
         this.commands = new Map();
         this.addCommand('help', (io) => {
             io.out('available commands list\n');
@@ -117,6 +118,8 @@ export default class Shell {
     }
     async prompt() {
         this.promptFunc((...args) => this.terminal.out(...args), this.status !== 0, this.user);
+        let defaultColor;
+        if (this.defaultVal !== '') defaultColor = this.parseCommand(this.defaultVal).err ? 'red' : 'cyan';
         const command = await this.terminal.in({
             oninput: ({srcElement}) => {
                 if (srcElement.value === '') {
@@ -125,13 +128,55 @@ export default class Shell {
                 }
                 const {err} = this.parseCommand(srcElement.value);
                 srcElement.style.color = err ? 'red' : 'cyan';
-            }
+            },
+            defaultVal: this.defaultVal,
+            defaultColor
         });
         if (command.includes('\x04')) {
             this.killed = true;
             return;
         }
-        const {commandArray} = this.parseCommand(command);
+        const {commandArray} = this.parseCommand(command.replace(/\t/g, ''));
+        if (command.includes('\x09')) {
+            const {commandName: lastCommandName} = commandArray[commandArray.length - 1];
+            const suggestList = [...this.commands.keys()]
+                .filter(e => e.indexOf(lastCommandName) === 0)
+                .sort()
+                ;
+            if (suggestList.length > 1) {
+                suggestList.forEach((e, i) => {
+                    this.terminal.out(`${e}${i % 3 === 2 ? '\n' : '\t'}`);
+                });
+                if (suggestList.length % 3 !== 0) this.terminal.out('\n');
+            }
+            let matchedString = lastCommandName;
+            if (suggestList.length !== 0) {
+                while (true) {
+                    if (suggestList[0][matchedString.length] === undefined) break;
+                    matchedString = matchedString.concat(suggestList[0][matchedString.length]);
+                    if (!suggestList.every(e => e.indexOf(matchedString) === 0)) {
+                        matchedString = matchedString.slice(0, -1);
+                        break;
+                    }
+                }
+            }
+            commandArray[commandArray.length - 1].commandName = matchedString;
+            console.log(commandArray);
+            this.defaultVal = commandArray
+                .map(e => {
+                    let block = e.commandName;
+                    if (e.args.length !== 0) block = `${block} ${e.args.join(' ')}`;
+                    if (e.after !== undefined) {
+                        if (e.after === '|') e.after = ' | ';
+                        block = `${block}${e.after}`;
+                    }
+                    return block;
+                })
+                .join('')
+                ;
+            return;
+        }
+        this.defaultVal = '';
         await this.execCommands(commandArray);
     }
     async run() {
