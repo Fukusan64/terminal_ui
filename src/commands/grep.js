@@ -4,19 +4,18 @@ export default async (io, args) => {
     let input = '';
     let finished = false;
     while (!finished) {
-        if ((input = await io.in()).includes('\x04')) {
-            finished = true;
-            input = input.replace(/\x04.*/, '');
+        let inputTmp = '';
+        finished = (inputTmp = await io.in()).includes('\x04');
+        input = `${input}${inputTmp.replace(/\x04.*/, '')}`;
+    }
+    for (const line of input.split('\n')) {
+        const splittedLine = line.split(keyword);
+        if (splittedLine.length === 1) continue;
+        for (let i = 0; i < splittedLine.length; i++) {
+            io.out(splittedLine[i]);
+            if (i !== splittedLine.length - 1) io.out(keyword, {color: 'red'});
         }
-        for (const line of input.split('\n')) {
-            const splittedLine = line.split(keyword);
-            if (splittedLine.length === 1) continue;
-            for (let i = 0; i < splittedLine.length; i++) {
-                io.out(splittedLine[i]);
-                if (i !== splittedLine.length - 1) io.out(keyword, {color: 'red'});
-            }
-            io.out('\n');
-        }
+        io.out('\n');
     }
     return 0;
 };
