@@ -10,7 +10,6 @@ export default class Shell {
         this.killed = false;
         this.version = version;
         this.terminal = terminal;
-        this.buffer = new Buffer();
         this.promptFunc = promptFunc;
         this.status = 0;
         this.defaultVal = '';
@@ -46,24 +45,26 @@ export default class Shell {
         return this.commands.has(name);
     }
     async execCommands(commandArray) {
+        let beforeBuffer = new Buffer();
         for (let i = 0; i < commandArray.length; i++){
             const commandData = commandArray[i];
             const io = {};
+            const buffer = new Buffer();
             if (commandData.before === '|') {
-                io.in = (...args) => this.buffer.in(...args);
+                io.in = (...args) => beforeBuffer.out(...args);
             } else {
                 io.in = (...args) => this.terminal.in(...args);
             }
             if (commandData.after === '|') {
-                this.buffer.clear();
-                io.out = (...args) => this.buffer.out(...args);
+                io.out = (...args) => buffer.in(...args);
             } else {
                 io.out = (...args) => this.terminal.out(...args);
             }
             await this.execCommand(commandData.commandName, io, commandData.args);
             if (commandData.after === '|') {
-                this.buffer.out('\x04');
+                buffer.in('\x04');
             }
+            beforeBuffer = buffer;
             if (this.status !== 0 && commandData.after === '&&') break;
             if (this.killed) break;
         }

@@ -2,10 +2,10 @@ export default class Buffer{
     constructor() {
         this.data = [];
     }
-    out(input) {
+    in(input) {
         this.data.push(input);
     }
-    in() {
+    out() {
         return this.data.shift();
     }
     clear() {
