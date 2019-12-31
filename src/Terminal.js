@@ -63,7 +63,7 @@ export default class Terminal {
                     e.srcElement.remove();
                     this._appendSpan(currentLine, `${text}`, {color, bgColor});
                     this.terminalElem.appendChild(this._createNewLine());
-                    res(text);
+                    res(`${text}\n`);
                 } else if (e.key === 'Tab') {
                     e.preventDefault();
                     e.stopPropagation();

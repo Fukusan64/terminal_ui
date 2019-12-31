@@ -85,6 +85,7 @@ export default class Shell {
         let keyword = '';
         const tokens = [];
         let err = false;
+        input = input.replace(/\n/g, '');
         for (let i = 0; i < input.length; i++) {
             if (input[i] === '|' || input[i] === ';') {
                 tokens.push(keyword, input[i]);
@@ -187,10 +188,10 @@ export default class Shell {
         this.terminal.clear();
         this.terminal.out('login\n');
         this.terminal.out('user: ');
-        this.user = await this.terminal.in();
+        this.user = (await this.terminal.in()).replace(/\n/g, '');
         if (this.user.includes('\x04')) return;
         this.terminal.out('password: ');
-        this.password = await this.terminal.in({hidden: true});
+        this.password = (await this.terminal.in({hidden: true})).replace(/\n/g, '');
         if (this.password.includes('\x04')) return;
         this.killed = false;
         this.terminal.out(`Kuso Zako Terminal Modoki ${this.version}\n\n`, {color: 'gray'});
