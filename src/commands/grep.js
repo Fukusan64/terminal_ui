@@ -17,6 +17,5 @@ export default async (io, args) => {
             if (i !== splittedLine.length - 1) io.out(keyword, {color: 'red'});
         }
     }
-    debugger;
     return 0;
 };
