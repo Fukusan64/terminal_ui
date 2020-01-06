@@ -9,7 +9,7 @@ export default class Terminal {
                 ;
         });
     }
-    in({oninput, hidden, defaultVal,defaultColor} = {}) {
+    in({customOninput, customOnkeydown, hidden, defaultVal, defaultColor, tabReturn} = {}) {
         return new Promise(res => {
             const lastLine = this.terminalElem.lastElementChild;
             const inputElem = document.createElement('input');
@@ -35,10 +35,9 @@ export default class Terminal {
             }
             inputElem.focus();
             if (hidden) inputElem.style.color = 'rgba(0,0,0,0)';
-            else {
-                if (typeof (oninput) === 'function') inputElem.addEventListener('input', oninput);
-                if (typeof (defaultColor) === 'string') inputElem.style.color = defaultColor;
-            }
+            if (typeof (customOninput) === 'function') inputElem.addEventListener('input', customOninput);
+            if (typeof (customOnkeydown) === 'function') inputElem.addEventListener('keydown', customOnkeydown);
+            if (typeof (defaultColor) === 'string') inputElem.style.color = defaultColor;
             if (defaultVal !== undefined) inputElem.value = defaultVal;
             let onkeydown;
             inputElem.addEventListener('keydown', onkeydown = (e) => {
@@ -50,7 +49,8 @@ export default class Terminal {
                     e.preventDefault();
                     e.stopPropagation();
                     e.srcElement.removeEventListener('keydown', onkeydown);
-                    e.srcElement.removeEventListener('input', oninput);
+                    e.srcElement.removeEventListener('keydown', customOnkeydown);
+                    e.srcElement.removeEventListener('input', customOninput);
                     e.srcElement.remove();
                     this._appendSpan(currentLine, `${text}^D`, {color, bgColor});
                     this.terminalElem.appendChild(this._createNewLine());
@@ -59,16 +59,18 @@ export default class Terminal {
                     e.preventDefault();
                     e.stopPropagation();
                     e.srcElement.removeEventListener('keydown', onkeydown);
-                    e.srcElement.removeEventListener('input', oninput);
+                    e.srcElement.removeEventListener('keydown', customOnkeydown);
+                    e.srcElement.removeEventListener('input', customOninput);
                     e.srcElement.remove();
                     this._appendSpan(currentLine, `${text}`, {color, bgColor});
                     this.terminalElem.appendChild(this._createNewLine());
                     res(`${text}\n`);
-                } else if (e.key === 'Tab') {
+                } else if (e.key === 'Tab' && tabReturn) {
                     e.preventDefault();
                     e.stopPropagation();
                     e.srcElement.removeEventListener('keydown', onkeydown);
-                    e.srcElement.removeEventListener('input', oninput);
+                    e.srcElement.removeEventListener('keydown', customOnkeydown);
+                    e.srcElement.removeEventListener('input', customOninput);
                     e.srcElement.remove();
                     this._appendSpan(currentLine, `${text}`, {color, bgColor});
                     this.terminalElem.appendChild(this._createNewLine());
