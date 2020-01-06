@@ -123,7 +123,7 @@ export default class Shell {
         let defaultColor;
         if (this.defaultVal !== '') defaultColor = this.parseCommand(this.defaultVal).err ? 'red' : 'cyan';
         const command = await this.terminal.in({
-            oninput: ({srcElement}) => {
+            customOninput: ({srcElement}) => {
                 if (srcElement.value === '') {
                     srcElement.style.color = 'white';
                     return;
@@ -132,6 +132,7 @@ export default class Shell {
                 srcElement.style.color = err ? 'red' : 'cyan';
             },
             defaultVal: this.defaultVal,
+            tabReturn: true,
             defaultColor
         });
         if (command.includes('\x04')) {
