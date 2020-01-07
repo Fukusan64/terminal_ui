@@ -1,4 +1,5 @@
 import Buffer from './Buffer';
+import History from './History';
 export default class Shell {
     constructor(
         terminal,
@@ -11,6 +12,7 @@ export default class Shell {
         this.version = version;
         this.terminal = terminal;
         this.promptFunc = promptFunc;
+        this.history = new History();
         this.status = 0;
         this.defaultVal = '';
         this.commands = new Map();
@@ -131,6 +133,30 @@ export default class Shell {
                 const {err} = this.parseCommand(srcElement.value);
                 srcElement.style.color = err ? 'red' : 'cyan';
             },
+            customOnkeydown: (e) => {
+                switch (e.key) {
+                    case 'ArrowUp': {
+                        e.srcElement.value = this.history.previous();
+                        if (e.srcElement.value === '') {
+                            e.srcElement.style.color = 'white';
+                            return;
+                        }
+                        const {err} = this.parseCommand(e.srcElement.value);
+                        e.srcElement.style.color = err ? 'red' : 'cyan';
+                        break;
+                    }
+                    case 'ArrowDown': {
+                        e.srcElement.value = this.history.next();
+                        if (e.srcElement.value === '') {
+                            e.srcElement.style.color = 'white';
+                            return;
+                        }
+                        const {err} = this.parseCommand(e.srcElement.value);
+                        e.srcElement.style.color = err ? 'red' : 'cyan';
+                        break;
+                    }
+                }
+            },
             defaultVal: this.defaultVal,
             tabReturn: true,
             defaultColor
@@ -145,6 +171,7 @@ export default class Shell {
             return;
         }
         this.defaultVal = '';
+        this.history.add(command);
         await this.execCommands(commandArray);
     }
     suggest(commandArray) {
@@ -187,6 +214,7 @@ export default class Shell {
     async run() {
         //多分シェルの仕事じゃないけど面倒なのでここでログイン処理をこなしてしまう
         this.terminal.clear();
+        this.history.clear();
         this.terminal.out('login\n');
         this.terminal.out('user: ');
         this.user = (await this.terminal.in()).replace(/\n/g, '');
