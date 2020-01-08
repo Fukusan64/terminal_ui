@@ -6,7 +6,7 @@ window.onload = async () => {
     const terminal = new Terminal('terminal');
     const shell = new Shell(
         terminal,
-        'v0.4.0',
+        'v0.4.1',
         (out, isError, user) => {
             out(`${user}@pc_hoge: `, {color: 'lime'});
             out('[', {color: 'cyan'});
