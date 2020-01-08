@@ -31,6 +31,10 @@ export default class Shell {
             }
             return 0;
         });
+        this.addCommand('history', (io) => {
+            this.history.historyArray.forEach(e => io.out(`${e}\n`));
+            return 0;
+        });
         this.addCommand('clear', () => {
             this.terminal.clear();
             return 0;
