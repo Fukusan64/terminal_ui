@@ -7,10 +7,10 @@ export default class History{
     previous() {
         if (this.pointer + 1 >= this.historyArray.length) {
             this.pointer = this.historyArray.length - 1;
-            return this.historyArray[this.pointer];
+            return this.historyArray[this.pointer] || '';
         }
         this.pointer++;
-        return this.historyArray[this.pointer];
+        return this.historyArray[this.pointer] || '';
     }
     next() {
         if (this.pointer - 1 < 0) {
@@ -18,7 +18,7 @@ export default class History{
             return '';
         }
         this.pointer--;
-        return this.historyArray[this.pointer];
+        return this.historyArray[this.pointer] || '';
     }
     add(command) {
         if (command === '\n') return;
